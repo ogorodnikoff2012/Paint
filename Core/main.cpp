@@ -20,9 +20,6 @@ int main(int argc, char *argv[])
     MainWindow* window = new MainWindow;
     window->show();
 
-    /*TestWidget wgt;
-    wgt.show();*/
-
     //qDebug() << QImageWriter::supportedImageFormats();
     return a.exec();
 }
