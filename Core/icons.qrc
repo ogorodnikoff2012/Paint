@@ -10,5 +10,9 @@
         <file>icons/zoom_out.png</file>
         <file>icons/swap.png</file>
         <file>icons/default_colors.png</file>
+        <file>icons/undo.png</file>
+        <file>icons/redo.png</file>
+        <file>icons/brush.png</file>
+        <file>cursors/brush.png</file>
     </qresource>
 </RCC>

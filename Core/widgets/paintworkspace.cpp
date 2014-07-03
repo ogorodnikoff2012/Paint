@@ -1,6 +1,7 @@
-#include "headers\paintworkspace.h"
+#include "headers/paintworkspace.h"
 #include "headers/mainwindow.h"
 #include "headers/workspaceshell.h"
+#include "headers/autosaver.h"
 
 #include <QtCore>
 #include <QtGui>
@@ -16,6 +17,7 @@ PaintWorkspace::PaintWorkspace(WorkspaceShell* shell, QWidget *parent, int width
     this->shell = shell;
     initWorkspace(width, height);
     addNewLayer(White);
+    autoSave();
 }
 
 PaintWorkspace::PaintWorkspace(WorkspaceShell* shell, const QString &filename)
@@ -24,6 +26,7 @@ PaintWorkspace::PaintWorkspace(WorkspaceShell* shell, const QString &filename)
     open(filename);
     initWorkspace(layers[0]->width(), layers[0]->height());
     hasFile = true;
+    autoSave();
 }
 
 PaintWorkspace::~PaintWorkspace()
@@ -32,6 +35,9 @@ PaintWorkspace::~PaintWorkspace()
         delete img;
     }
     delete change;
+    foreach (QTemporaryFile* file, undoStack) {
+        delete file;
+    }
 }
 
 void PaintWorkspace::initWorkspace(int width, int height)
@@ -46,6 +52,9 @@ void PaintWorkspace::initWorkspace(int width, int height)
     mouseBlocker = 0;
     hasFile = false;
     changed = false;
+    undoPointer = -1;
+    setMouseTracking(true);
+    repaintTimer.start();
 }
 
 QImage *PaintWorkspace::newChange()
@@ -60,15 +69,8 @@ void PaintWorkspace::applyChange()
 {
     if (!change)
         return;
-    QPainter painter;
-    painter.begin(layers[curLayer]);
-    painter.drawImage(0, 0, *change);
-    painter.end();
-    delete change;
-    change = 0;
-    if (!changed)
-        emit nameChanged("*" + QFileInfo(name).fileName());
-    changed = true;
+    mergeLayerAndChange();
+    autoSave();
 }
 
 void PaintWorkspace::setName(const QString &name)
@@ -157,6 +159,7 @@ void PaintWorkspace::mousePressEvent(QMouseEvent *event)
     ++mouseBlocker;
     if (mouseBlocker - 1)
         return;
+    coords = (event->pos() - QPoint(getScale() / 2, getScale() / 2)) / getScale();
     MainWindow::window->getInstrument()->mousePressed(event, this);
     update();
     shell->updateRulers();
@@ -167,6 +170,7 @@ void PaintWorkspace::mouseReleaseEvent(QMouseEvent *event)
     --mouseBlocker;
     if (mouseBlocker)
         return;
+    coords = (event->pos() - QPoint(getScale() / 2, getScale() / 2)) / getScale();
     MainWindow::window->getInstrument()->mouseReleased(event, this);
     update();
     shell->updateRulers();
@@ -175,9 +179,16 @@ void PaintWorkspace::mouseReleaseEvent(QMouseEvent *event)
 
 void PaintWorkspace::mouseMoveEvent(QMouseEvent *event)
 {
-    MainWindow::window->getInstrument()->mouseMoved(event, this);
-    update();
+    coords = (event->pos() - QPoint(getScale() / 2, getScale() / 2)) / getScale();
+    if(mouseBlocker == 1)
+        MainWindow::window->getInstrument()->mouseMoved(event, this);
+    if(repaintTimer.elapsed() >= MIN_REPAINT_INTERVAL)
+    {
+        update();
+        repaintTimer.restart();
+    }
     shell->updateRulers();
+    MainWindow::window->updateIndicators();
 }
 
 void PaintWorkspace::wheelEvent(QWheelEvent *event)
@@ -264,6 +275,15 @@ void PaintWorkspace::importQtp(const QString &filename)
     file.close();
 }
 
+void PaintWorkspace::autoSave()
+{
+    AutoSaver *saver = new AutoSaver(curLayer, new QImage(*layers[curLayer]));
+    //qDebug() << QThread::currentThread();
+    connect(saver, SIGNAL(finished()), saver, SLOT(deleteLater()));
+    connect(saver, SIGNAL(savingFinished(QTemporaryFile*)), SLOT(updateUndoStack(QTemporaryFile*)));
+    saver->start();
+}
+
 QString PaintWorkspace::getFilter()
 {
     QStringList list;
@@ -304,6 +324,96 @@ void PaintWorkspace::restoreZoom()
 {
     setScale(1);
     update();
+}
+
+void PaintWorkspace::undo()
+{
+    if(!undoAvailable())
+    {
+        return;
+    }
+
+    undoPointer--;
+
+    QTemporaryFile* f = undoStack[undoPointer];
+
+    if (f->open())
+    {
+        QDataStream stream(f);
+        stream.setVersion(QDataStream::Qt_5_0);
+        int layerIndex = 0;
+        stream >> layerIndex;
+
+        QImage img;
+        stream >> img;
+        QImage* layer = new QImage(img);
+        QImage* oldLayer = layers[layerIndex];
+        layers[layerIndex] = layer;
+        delete oldLayer;
+    } else {
+        QMessageBox::critical(0, tr("Error"), tr("Saving failed!"));
+    }
+    f->close();
+    update();
+    shell->updateRulers();
+}
+
+void PaintWorkspace::redo()
+{
+    if(!redoAvailable())
+    {
+        return;
+    }
+
+    undoPointer++;
+
+    QTemporaryFile* f = undoStack[undoPointer];
+
+    if (f->open())
+    {
+        QDataStream stream(f);
+        stream.setVersion(QDataStream::Qt_5_0);
+        int layerIndex = 0;
+        stream >> layerIndex;
+
+        QImage img;
+        stream >> img;
+        QImage* layer = new QImage(img);
+        QImage* oldLayer = layers[layerIndex];
+        layers[layerIndex] = layer;
+        delete oldLayer;
+    } else {
+        QMessageBox::critical(0, tr("Error"), tr("Saving failed!"));
+    }
+    f->close();
+    update();
+    shell->updateRulers();
+}
+
+void PaintWorkspace::mergeLayerAndChange()
+{
+    QPainter painter;
+    painter.begin(layers[curLayer]);
+    painter.drawImage(0, 0, *change);
+    painter.end();
+    delete change;
+    change = 0;
+    if (!changed)
+        emit nameChanged("*" + QFileInfo(name).fileName());
+    changed = true;
+}
+
+void PaintWorkspace::updateUndoStack(QTemporaryFile *f)
+{
+    undoPointer++;
+    int newSize = undoPointer + 1;
+    for(int i = newSize - 1; i < undoStack.size(); i++)
+    {
+        delete undoStack[i];
+    }
+    undoStack.resize(newSize - 1);
+    undoStack.append(f);
+
 }
 
 void PaintWorkspace::changeScale(int direction)

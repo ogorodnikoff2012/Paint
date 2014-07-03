@@ -8,8 +8,6 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    for (int i = 0; i < argc; ++i)
-        qDebug() << argv[i];
     QTranslator translator;
 
     QString str = QLocale::system().name();
@@ -19,7 +17,22 @@ int main(int argc, char *argv[])
 
     MainWindow* window = new MainWindow;
     window->show();
-	window->newFile();
+    int openedFiles = 0;
+    for (int i = 1; i < argc; ++i)
+    {
+        QString filename = QString::fromLocal8Bit(argv[i]);
+        qDebug() << filename;
+        if(QFileInfo(filename).exists())
+        {
+            window->open(filename);
+            openedFiles++;
+        }
+    }
+
+    if(!openedFiles)
+    {
+        window->newFile(800, 600);
+    }
 
     //qDebug() << QImageWriter::supportedImageFormats();
     return a.exec();

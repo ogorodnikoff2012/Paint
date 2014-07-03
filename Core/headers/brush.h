@@ -1,12 +1,17 @@
-#ifndef PENCIL_H
-#define PENCIL_H
+#ifndef BRUSH_H
+#define BRUSH_H
 
 #include <QString>
 #include "instrument.h"
 #include <QPoint>
 #include <QColor>
+#include <QObject>
+#include <QVector>
 
-class Pencil : Instrument
+class QSpinBox;
+class QComboBox;
+
+class Brush : Instrument
 {
 public:
     void mousePressed(QMouseEvent* evt, PaintWorkspace* wsp);
@@ -17,12 +22,14 @@ public:
     static Instrument* instance;
     const QString getName()
     {
-        return QObject::tr("Pencil");
+        return QObject::tr("Brush");
     }
     void init();
 protected:
-    QPoint lastPos;
+    QVector<QPoint> polygon;
     QColor col;
+    QSpinBox* size;
+    QComboBox* endStyle;
 };
 
-#endif // PENCIL_H
+#endif // BRUSH_H

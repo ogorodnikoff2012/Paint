@@ -1,5 +1,6 @@
 #include "headers\mainwindow.h"
 #include "headers/plugin.h"
+#include "headers/brush.h"
 #include "headers/pencil.h"
 #include "headers/workspaceshell.h"
 #include "headers/paintworkspace.h"
@@ -12,7 +13,8 @@
 MainWindow* MainWindow::window = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent),
+    currentInstrument(0)
 {
     window = this;
     initBackgroundBrush();
@@ -32,20 +34,58 @@ QColor MainWindow::getSecondColor()
     return pal->getSecondColor();
 }
 
-void MainWindow::newFile()
+void MainWindow::newFile(int width, int height)
 {
-    WorkspaceShell* s = new WorkspaceShell;
+    WorkspaceShell* s = new WorkspaceShell(0, width, height);
     area->addSubWindow(s);
     s->show();
+}
+
+void MainWindow::newFile()
+{
+    QDialog* dialog = new QDialog;
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    QVBoxLayout* layout = new QVBoxLayout;
+
+    QHBoxLayout* layout_1 = new QHBoxLayout;
+    QLabel* label_1 = new QLabel(tr("Width"));
+    QSpinBox* width = new QSpinBox;
+    width->setMaximum(800000);
+    width->setValue(800);
+    width->setSuffix("px");
+    layout_1->addWidget(label_1);
+    layout_1->addWidget(width);
+
+    QHBoxLayout* layout_2 = new QHBoxLayout;
+    QLabel* label_2 = new QLabel(tr("Height"));
+    QSpinBox* height = new QSpinBox;
+    height->setMaximum(600000);
+    height->setValue(600);
+    height->setSuffix("px");
+    layout_2->addWidget(label_2);
+    layout_2->addWidget(height);
+
+    layout->addLayout(layout_1);
+    layout->addLayout(layout_2);
+    layout->addWidget(buttonBox);
+    connect(buttonBox, SIGNAL(accepted()), dialog, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), dialog, SLOT(reject()));
+    dialog->setLayout(layout);
+    int ans = dialog->exec();
+    if(ans == QDialog::Accepted)
+    {
+        int w = width->value();
+        int h = height->value();
+        newFile(w, h);
+    }
+    delete dialog;
 }
 
 void MainWindow::open()
 {
     QStringList list = QFileDialog::getOpenFileNames(0, tr("Open files"), QDir::homePath(), PaintWorkspace::getFilter());
     foreach(QString str, list) {
-        WorkspaceShell* s = new WorkspaceShell(0, 0, 0, str);
-        area->addSubWindow(s);
-        s->show();
+        open(str);
     }
 
     setWindowState(Qt::WindowActive | windowState());
@@ -88,16 +128,46 @@ void MainWindow::restoreZoom()
         wsp->restoreZoom();
 }
 
+void MainWindow::undo()
+{
+    PaintWorkspace* wsp = getCurrentWorkspace();
+    if(wsp)
+        wsp->undo();
+}
+
+void MainWindow::redo()
+{
+    PaintWorkspace* wsp = getCurrentWorkspace();
+    if(wsp)
+        wsp->redo();
+}
+
 void MainWindow::closeEvent(QCloseEvent *evt)
 {
-    foreach(QMdiSubWindow * sw, area->subWindowList()) {
-        if (!sw->close()) {
+    foreach(QMdiSubWindow * sw, area->subWindowList())
+    {
+        if (!sw->close())
+        {
             evt->ignore();
             return;
         } else
             delete sw;
     }
     evt->accept();
+}
+
+void MainWindow::updateUndoButtons()
+{
+    PaintWorkspace* wsp = getCurrentWorkspace();
+    if(wsp)
+    {
+        aUndo->setEnabled(wsp->undoAvailable());
+        aRedo->setEnabled(wsp->redoAvailable());
+    } else
+    {
+        aUndo->setEnabled(false);
+        aRedo->setEnabled(false);
+    }
 }
 
 void MainWindow::loadPlugins()
@@ -107,19 +177,23 @@ void MainWindow::loadPlugins()
     if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
         pluginsDir.cdUp();
 #elif defined(Q_OS_MAC)
-    if (pluginsDir.dirName() == "MacOS") {
+    if (pluginsDir.dirName() == "MacOS")
+    {
         pluginsDir.cdUp();
         pluginsDir.cdUp();
         pluginsDir.cdUp();
     }
 #endif
     pluginsDir.cd("plugins");
-    foreach(QString fileName, pluginsDir.entryList(QDir::Files)) {
+    foreach(QString fileName, pluginsDir.entryList(QDir::Files))
+    {
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
         QObject *obj = pluginLoader.instance();
-        if (obj) {
+        if (obj)
+        {
             Plugin* plugin = qobject_cast<Plugin *>(obj);
-            if (plugin) {
+            if (plugin)
+            {
                 plugin->initPlugin(this);
             }
         }
@@ -136,6 +210,7 @@ void MainWindow::createGUI()
     createInstrumentsToolBar();
     createMenuBar();
     createPalette();
+    createStatusBar();
 
     statusBar()->showMessage(tr("Ready"), 2000);
 }
@@ -145,7 +220,9 @@ void MainWindow::createInstrumentsToolBar()
     QToolBar* tBar = new QToolBar(tr("Instruments"));
     instrumentBar = tBar;
     Pencil::instance->init();
+    Brush::instance->init();
     tBar->addAction(createAction(Pencil::instance));
+    tBar->addAction(createAction(Brush::instance));
 
     setCurrentInstrument(Pencil::instance);
     addToolBar(Qt::LeftToolBarArea, tBar);
@@ -214,8 +291,26 @@ void MainWindow::createMenuBar()
     mView->addAction(aCascade);
     mView->addAction(aTile);
 
+    QMenu* mEdit = new QMenu(tr("Edit"));
+
+    aUndo = new QAction(tr("Undo"), 0);
+    aUndo->setIcon(QIcon(":icons/undo.png"));
+    aUndo->setShortcut(QKeySequence(QKeySequence::Undo));
+    connect(aUndo, SIGNAL(triggered()), SLOT(undo()));
+
+    aRedo = new QAction(tr("Redo"), 0);
+    aRedo->setIcon(QIcon(":icons/redo.png"));
+    aRedo->setShortcut(QKeySequence(QKeySequence::Redo));
+    connect(aRedo, SIGNAL(triggered()), SLOT(redo()));
+
+    connect(mEdit, SIGNAL(aboutToShow()), SLOT(updateUndoButtons()));
+
+    mEdit->addAction(aUndo);
+    mEdit->addAction(aRedo);
+
     menuBar()->addMenu(mFile);
     menuBar()->addMenu(mView);
+    menuBar()->addMenu(mEdit);
 }
 
 void MainWindow::createPalette()
@@ -226,11 +321,21 @@ void MainWindow::createPalette()
     addDockWidget(Qt::BottomDockWidgetArea, dock);
 }
 
+void MainWindow::createStatusBar()
+{
+    mouseCoords = new QLabel("(0, 0)");
+    statusBar()->addWidget(mouseCoords);
+}
+
 void MainWindow::setCurrentInstrument(Instrument *i)
 {
     if (!i)
         return;
+    if(currentInstrument && currentInstrument->settings)
+        removeDockWidget(currentInstrument->settings);
     currentInstrument = i;
+    if(currentInstrument->settings)
+        addDockWidget(Qt::LeftDockWidgetArea, currentInstrument->settings);
     area->setCursor(*(i->cursor));
     qDebug() << "Instrument selected:" << i->getName();
 }
@@ -271,4 +376,19 @@ void MainWindow::initBackgroundBrush()
     backgroundPainter.end();
 
     background = QBrush(*backgroundImage);
+}
+
+void MainWindow::updateIndicators()
+{
+    PaintWorkspace* wsp = getCurrentWorkspace();
+    if(!wsp)
+        return;
+    mouseCoords->setText("(" + QString::number(wsp->getCoords().x()) + ", " + QString::number(wsp->getCoords().y()) + ")");
+}
+
+void MainWindow::open(const QString &filename)
+{
+    WorkspaceShell* s = new WorkspaceShell(0, 0, 0, filename);
+    area->addSubWindow(s);
+    s->show();
 }

@@ -20,7 +20,9 @@ SOURCES += main.cpp \
 	widgets/workspaceshell.cpp \
 	widgets/verticalruler.cpp \
 	widgets/horizontalruler.cpp \
-    widgets/palette.cpp
+    widgets/palette.cpp \
+    misc/autosaver.cpp \
+    instruments/brush.cpp
 
 HEADERS  += \
 	headers/paintworkspace.h \
@@ -33,17 +35,19 @@ HEADERS  += \
 	headers/verticalruler.h \
 	headers/ruler.h \
 	headers/horizontalruler.h \
-    headers/palette.h
+    headers/palette.h \
+    headers/autosaver.h \
+    headers/brush.h
 
 win32 {
 	CONFIG(debug, release|debug):DESTDIR = ../debug/
 	CONFIG(release, release|debug):DESTDIR = ../release/
+	RC_FILE += file.rc
 } else {
 	DESTDIR    = ../
 }
 
-FORMS += \
-	widgets/mainwindow.ui
+FORMS +=
 
 RESOURCES += \
 	icons.qrc

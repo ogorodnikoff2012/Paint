@@ -54,7 +54,7 @@ void WorkspaceShell::initWorkspace(const int width, const int height, const QStr
     layout->addLayout(layout1);
     layout->addLayout(layout2, 1);
 
-    QLabel* lbl = new QLabel("<big><b>px");
+    QLabel* lbl = new QLabel();//"<big><b>px");
     lbl->setMinimumSize(RULER_SIZE, RULER_SIZE);
     lbl->setAlignment(Qt::AlignCenter);
     layout1->addWidget(lbl);

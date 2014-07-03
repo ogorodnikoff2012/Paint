@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QVariant>
 #include <QAction>
+#include <QString>
 #include "instrument.h"
 #include "palette.h"
 
@@ -11,6 +12,7 @@ class QToolBar;
 class QMdiArea;
 class QColor;
 class QCloseEvent;
+class QLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -35,7 +37,10 @@ public:
     QColor getSecondColor();
 
     void initBackgroundBrush();
+    void updateIndicators();
     QBrush background;
+    void open(const QString& filename);
+    void newFile(int width, int height);
 
 signals:
 
@@ -55,9 +60,14 @@ public slots:
     void zoomIn();
     void zoomOut();
     void restoreZoom();
+    void undo();
+    void redo();
 
 protected:
     void closeEvent(QCloseEvent* evt);
+
+protected slots:
+    void updateUndoButtons();
 
 private:
     void loadPlugins();
@@ -65,6 +75,7 @@ private:
     void createInstrumentsToolBar();
     void createMenuBar();
     void createPalette();
+    void createStatusBar();
     void setCurrentInstrument(Instrument* i);
     PaintWorkspace* getCurrentWorkspace();
     QToolBar* instrumentBar;
@@ -72,6 +83,9 @@ private:
     QAction* createAction(Instrument* instrument);
     QMdiArea* area;
     Palette* pal;
+    QAction* aUndo;
+    QAction* aRedo;
+    QLabel* mouseCoords;
 };
 
 #endif // MAINWINDOW_H

@@ -1,8 +1,12 @@
 #ifndef PAINTWORKSPACE_H
 #define PAINTWORKSPACE_H
 
+#define MIN_REPAINT_INTERVAL 50
+
 #include <QWidget>
 #include <QVector>
+#include <QPoint>
+#include <QTime>
 class QImage;
 class QPaintEvent;
 class QMouseEvent;
@@ -11,6 +15,7 @@ class QBrush;
 class QPaintDevice;
 class QWheelEvent;
 class WorkspaceShell;
+class QTemporaryFile;
 
 class PaintWorkspace : public QWidget
 {
@@ -45,6 +50,14 @@ public:
     static const double minScale;
     static const double maxScale;
     void changeScale(int direction);
+    bool undoAvailable()
+    {
+        return undoPointer > 0;
+    }
+    bool redoAvailable()
+    {
+        return undoPointer < undoStack.size() - 1;
+    }
 
 signals:
     void nameChanged(const QString&);
@@ -54,6 +67,17 @@ public slots:
     void zoomIn();
     void zoomOut();
     void restoreZoom();
+    void undo();
+    void redo();
+    QPoint getCoords()
+    {
+        return coords;
+    }
+
+
+protected slots:
+    void mergeLayerAndChange();
+    void updateUndoStack(QTemporaryFile *f);
 
 protected:
     void initWorkspace(const int width = 0, const int height = 0);
@@ -66,6 +90,7 @@ protected:
     void exportQtp(const QString& filename);
     void open(const QString& filename);
     void importQtp(const QString& filename);
+    void autoSave();
     QString name;
     bool hasFile, changed;
     int mouseBlocker;
@@ -75,6 +100,10 @@ protected:
     int layerWidth, layerHeight, curLayer, layerCounter;
     QImage* change;
     WorkspaceShell* shell;
+    QVector<QTemporaryFile *> undoStack;
+    int undoPointer;
+    QPoint coords;
+    QTime repaintTimer;
 };
 
 #endif // PAINTWORKSPACE_H
