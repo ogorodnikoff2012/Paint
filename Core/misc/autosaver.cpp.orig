@@ -1,37 +1,31 @@
-#include "headers/autosaver.h"
+#include "headers\autosaver.h"
 #include <QtCore>
 #include <QtGui>
 
 AutoSaver::AutoSaver(int layerIndex, QImage *img, QObject *parent) :
-    QThread(parent),
-    layerIndex(layerIndex),
-    img(img)
+    QThread(parent)
 {
-
+    this->layerIndex = layerIndex;
+    this->img = img;
 }
 
 void AutoSaver::run()
 {
+    QTemporaryFile* file = new QTemporaryFile;
     //qDebug() << QThread::currentThread();
     emit copyingFinished();
 
-    if (file->open())
-    {
+    if (file->open()) {
         QDataStream stream(file);
         stream.setVersion(QDataStream::Qt_5_0);
         stream << layerIndex;
         stream << *img;
 
         if (stream.status() != QDataStream::Ok)
-        {
             qDebug() << "Auto-saving failed!";
-        }
-    }
-    else
-    {
+    } else {
         qDebug() << "Auto-saving failed!";
     }
-
     file->close();
     //img->save("preview.png");
 
@@ -39,5 +33,4 @@ void AutoSaver::run()
 
     emit savingFinished(file);
     delete img;
-    file = 0;
 }

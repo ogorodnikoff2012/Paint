@@ -14,5 +14,7 @@
         <file>icons/redo.png</file>
         <file>icons/brush.png</file>
         <file>cursors/brush.png</file>
+        <file>icons/line.png</file>
+        <file>cursors/line.png</file>
     </qresource>
 </RCC>

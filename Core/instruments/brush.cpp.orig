@@ -1,4 +1,4 @@
-#include "headers/brush.h"
+#include "headers\brush.h"
 #include "headers/paintworkspace.h"
 #include "headers/mainwindow.h"
 
@@ -6,29 +6,22 @@
 #include <QtGui>
 #include <QtWidgets>
 
-Instrument *Brush::instance = new Brush;
+Instrument* Brush::instance = new Brush;
 
 
 
 void Brush::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
 {
     QPoint pos = wsp->getCoords();
-    QImage *img = wsp->newChange();
+    QImage* img = wsp->newChange();
     QPainter painter(img);
-
     if (evt->buttons() & Qt::LeftButton)
-    {
         col = MainWindow::window->getFirstColor();
-    }
     else
-    {
         col = MainWindow::window->getSecondColor();
-    }
-
     QPen pen(col);
     pen.setWidth(size->value());
-    pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
-                                          endStyle->currentIndex()).toInt()));
+    pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(endStyle->currentIndex()).toInt()));
     painter.setPen(pen);
     painter.drawPoint(pos);
     polygon.clear();
@@ -39,14 +32,13 @@ void Brush::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
 void Brush::mouseMoved(QMouseEvent *, PaintWorkspace *wsp)
 {
     QPoint pos = wsp->getCoords();
-    QImage *img = wsp->getChange();
+    QImage* img = wsp->getChange();
     img->fill(Qt::transparent);
     QPainter painter(img);
     polygon.append(pos);
     QPen pen(col);
     pen.setWidth(size->value());
-    pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
-                                          endStyle->currentIndex()).toInt()));
+    pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(endStyle->currentIndex()).toInt()));
     painter.setPen(pen);
     painter.drawPolyline(QPolygon(polygon));
     painter.end();
@@ -67,8 +59,8 @@ void Brush::paintChange(QPainter &painter, QImage *layer, QImage *change)
 void Brush::initSettingsDockWidget()
 {
     settings = new QDockWidget;
-    QWidget *w = new QWidget;
-    QVBoxLayout *l = new QVBoxLayout;
+    QWidget* w = new QWidget;
+    QVBoxLayout* l = new QVBoxLayout;
     size = new QSpinBox;
     size->setMinimum(1);
     size->setMaximum(1000);

@@ -1,4 +1,4 @@
-#include "headers/pencil.h"
+#include "headers\pencil.h"
 #include "headers/paintworkspace.h"
 #include "headers/mainwindow.h"
 
@@ -6,7 +6,7 @@
 #include <QtGui>
 #include <QtWidgets>
 
-Instrument *Pencil::instance = new Pencil;
+Instrument* Pencil::instance = new Pencil;
 
 void Pencil::initSettingsDockWidget()
 {
@@ -19,18 +19,12 @@ void Pencil::initSettingsDockWidget()
 void Pencil::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
 {
     QPoint pos = wsp->getCoords();
-    QImage *img = wsp->newChange();
+    QImage* img = wsp->newChange();
     QPainter painter(img);
-
     if (evt->buttons() & Qt::LeftButton)
-    {
         col = MainWindow::window->getFirstColor();
-    }
     else
-    {
         col = MainWindow::window->getSecondColor();
-    }
-
     QPen pen(col);
     pen.setCapStyle(Qt::FlatCap);
     painter.setPen(pen);
@@ -43,13 +37,11 @@ void Pencil::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
 void Pencil::mouseMoved(QMouseEvent *, PaintWorkspace *wsp)
 {
     QPoint pos = wsp->getCoords();
-
-    if (pos.x() == lastPos.x() && pos.y() == lastPos.y())
+    if(pos.x() == lastPos.x() && pos.y() == lastPos.y())
     {
         return;
     }
-
-    QImage *img = wsp->getChange();
+    QImage* img = wsp->getChange();
     QPainter painter;
     painter.begin(img);
     QPen pen(col);

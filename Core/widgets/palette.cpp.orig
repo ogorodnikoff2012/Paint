@@ -1,4 +1,4 @@
-#include "headers/palette.h"
+#include "headers\palette.h"
 #include "headers/mainwindow.h"
 
 #include <QtCore>
@@ -36,11 +36,11 @@ Palette::Palette(QWidget *parent) :
                   "}");
 
     QLayout *indicatorLayout = createIndicator();
-    QLayout *paletteLayout = createPalette();
+    QLayout* paletteLayout = createPalette();
     layout->addLayout(indicatorLayout);
     layout->addLayout(paletteLayout);
 
-    QPushButton *moreColorsButton = new QPushButton(tr("More colors"));
+    QPushButton* moreColorsButton = new QPushButton(tr("More colors"));
     connect(moreColorsButton, SIGNAL(clicked()), SLOT(moreColors()));
     layout->addWidget(moreColorsButton);
     layout->addStretch();
@@ -50,24 +50,17 @@ Palette::Palette(QWidget *parent) :
 
 void Palette::changeCurrentColor()
 {
-    QPushButton *button = qobject_cast<QPushButton *>(sender());
-
-    if (button == firstColorButton)
-    {
+    QPushButton* button = qobject_cast<QPushButton *>(sender());
+    if(button == firstColorButton)
         currentColor = &firstColor;
-    }
-    else if (button == secondColorButton)
-    {
+    else if(button == secondColorButton)
         currentColor = &secondColor;
-    }
 }
 
 void Palette::updateIndicator()
 {
-    firstColorButton->setStyleSheet("QPushButton {background-color: " +
-                                    firstColor.name() + "}");
-    secondColorButton->setStyleSheet("QPushButton {background-color: " +
-                                     secondColor.name() + "}");
+    firstColorButton->setStyleSheet("QPushButton {background-color: " + firstColor.name() + "}");
+    secondColorButton->setStyleSheet("QPushButton {background-color: " + secondColor.name() + "}");
 }
 
 void Palette::swapColors()
@@ -87,27 +80,21 @@ void Palette::defaultColors()
 
 void Palette::setColor()
 {
-    QPushButton *button = qobject_cast<QPushButton *>(sender());
-
-    if (button && button->objectName() == "colorChooser")
-    {
-        QPalette pal = button->palette();
-        QBrush brush = pal.background();
-        *currentColor = brush.color();
-        updateIndicator();
-    }
+     QPushButton* button = qobject_cast<QPushButton *>(sender());
+     if(button && button->objectName() == "colorChooser")
+     {
+         QPalette pal = button->palette();
+         QBrush brush = pal.background();
+         *currentColor = brush.color();
+         updateIndicator();
+     }
 }
 
 void Palette::moreColors()
 {
-    QColor col = QColorDialog::getColor(*currentColor, MainWindow::window,
-                                        tr("Choose color"), QColorDialog::ShowAlphaChannel);
-
-    if (col.isValid())
-    {
+    QColor col = QColorDialog::getColor(*currentColor, MainWindow::window, tr("Choose color"), QColorDialog::ShowAlphaChannel);
+    if(col.isValid())
         *currentColor = col;
-    }
-
     updateIndicator();
 }
 
@@ -151,11 +138,11 @@ void Palette::initStandardColors()
 QLayout *Palette::createIndicator()
 {
     firstColorButton = new QPushButton;
-    QFrame *firstColorFrame = new QFrame;
+    QFrame* firstColorFrame = new QFrame;
     secondColorButton = new QPushButton;
-    QFrame *secondColorFrame = new QFrame;
+    QFrame* secondColorFrame = new QFrame;
 
-    QGridLayout *indicatorLayout = new QGridLayout;
+    QGridLayout* indicatorLayout = new QGridLayout;
 
     indicatorLayout->setSpacing(0);
 
@@ -173,7 +160,7 @@ QLayout *Palette::createIndicator()
     connect(secondColorButton, SIGNAL(clicked()), SLOT(changeCurrentColor()));
 
     indicatorLayout->addWidget(secondColorFrame, 1, 1, 2, 2);
-    QHBoxLayout *secondColorLayout = new QHBoxLayout;
+    QHBoxLayout* secondColorLayout = new QHBoxLayout;
     secondColorLayout->setMargin(0);
     secondColorFrame->setLayout(secondColorLayout);
     secondColorLayout->addWidget(secondColorButton);
@@ -195,14 +182,14 @@ QLayout *Palette::createIndicator()
     connect(firstColorButton, SIGNAL(clicked()), SLOT(changeCurrentColor()));
 
     indicatorLayout->addWidget(firstColorFrame, 0, 0, 2, 2);
-    QHBoxLayout *firstColorLayout = new QHBoxLayout;
+    QHBoxLayout* firstColorLayout = new QHBoxLayout;
     firstColorLayout->setMargin(0);
     firstColorFrame->setLayout(firstColorLayout);
     firstColorLayout->addWidget(firstColorButton);
 
     //----------------------------------------------------
 
-    QPushButton *swap = new QPushButton;
+    QPushButton* swap = new QPushButton;
     swap->setIcon(QIcon(":icons/swap.png"));
     swap->setMinimumSize(16, 16);
     swap->setMaximumSize(16, 16);
@@ -212,7 +199,7 @@ QLayout *Palette::createIndicator()
 
     indicatorLayout->addWidget(swap, 0, 2);
 
-    QPushButton *defaultColors = new QPushButton;
+    QPushButton* defaultColors = new QPushButton;
     defaultColors->setIcon(QIcon(":icons/default_colors.png"));
     defaultColors->setMinimumSize(16, 16);
     defaultColors->setMaximumSize(16, 16);
@@ -224,7 +211,7 @@ QLayout *Palette::createIndicator()
 
     updateIndicator();
 
-    QVBoxLayout *globalLayout = new QVBoxLayout;
+    QVBoxLayout* globalLayout = new QVBoxLayout;
     globalLayout->addStretch();
     globalLayout->addLayout(indicatorLayout);
     globalLayout->addStretch();
@@ -234,27 +221,24 @@ QLayout *Palette::createIndicator()
 
 QLayout *Palette::createPalette()
 {
-    QGridLayout *layout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout;
     layout->setVerticalSpacing(0);
     layout->setHorizontalSpacing(0);
     int numOfColors = standardColors.size();
-
-    for (int i = 0; i < numOfColors; ++i)
+    for(int i = 0; i < numOfColors; ++i)
     {
-        QPushButton *button = new QPushButton;
+        QPushButton* button = new QPushButton;
         button->setMinimumSize(15, 15);
         button->setMaximumSize(15, 15);
         button->setObjectName("colorChooser");
-        button->setStyleSheet("QPushButton {background-color: " +
-                              standardColors[i].name() + "}");
+        button->setStyleSheet("QPushButton {background-color: " + standardColors[i].name() + "}");
         QPalette pal = button->palette();
         pal.setColor(QPalette::Background, standardColors[i]);
         button->setPalette(pal);
         connect(button, SIGNAL(clicked()), SLOT(setColor()));
-        layout->addWidget(button, (i * 2) / numOfColors, (i) % (numOfColors / 2));
+        layout->addWidget(button, (i*2) / numOfColors, (i) % (numOfColors / 2));
     }
-
-    QVBoxLayout *globalLayout = new QVBoxLayout;
+    QVBoxLayout* globalLayout = new QVBoxLayout;
     globalLayout->addStretch();
     globalLayout->addLayout(layout);
     globalLayout->addStretch();

@@ -38,11 +38,11 @@ protected slots:
 protected:
     void initStandardColors();
     QColor firstColor, secondColor;
-    QColor *currentColor;
-    QLayout *createIndicator();
-    QLayout *createPalette();
-    QPushButton *firstColorButton;
-    QPushButton *secondColorButton;
+    QColor* currentColor;
+    QLayout* createIndicator();
+    QLayout* createPalette();
+    QPushButton* firstColorButton;
+    QPushButton* secondColorButton;
     QVector<QColor> standardColors;
 };
 

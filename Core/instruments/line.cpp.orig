@@ -1,4 +1,4 @@
-#include "headers/brush.h"
+#include "headers/line.h"
 #include "headers/paintworkspace.h"
 #include "headers/mainwindow.h"
 
@@ -6,16 +6,12 @@
 #include <QtGui>
 #include <QtWidgets>
 
-Instrument *Brush::instance = new Brush;
+Instrument *Line::instance = new Line;
 
-
-
-void Brush::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
+void Line::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
 {
-    QPoint pos = wsp->getCoords();
-    QImage *img = wsp->newChange();
-    QPainter painter(img);
-
+    start = end = wsp->getCoords();
+    wsp->newChange();
     if (evt->buttons() & Qt::LeftButton)
     {
         col = MainWindow::window->getFirstColor();
@@ -25,46 +21,39 @@ void Brush::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
         col = MainWindow::window->getSecondColor();
     }
 
-    QPen pen(col);
-    pen.setWidth(size->value());
-    pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
-                                          endStyle->currentIndex()).toInt()));
-    painter.setPen(pen);
-    painter.drawPoint(pos);
-    polygon.clear();
-    polygon.append(pos);
-    painter.end();
 }
 
-void Brush::mouseMoved(QMouseEvent *, PaintWorkspace *wsp)
+void Line::mouseMoved(QMouseEvent *, PaintWorkspace *wsp)
 {
-    QPoint pos = wsp->getCoords();
+    end = wsp->getCoords();
+}
+
+void Line::mouseReleased(QMouseEvent *, PaintWorkspace *wsp)
+{
     QImage *img = wsp->getChange();
-    img->fill(Qt::transparent);
     QPainter painter(img);
-    polygon.append(pos);
     QPen pen(col);
     pen.setWidth(size->value());
     pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
                                           endStyle->currentIndex()).toInt()));
     painter.setPen(pen);
-    painter.drawPolyline(QPolygon(polygon));
+    painter.drawLine(start, end);
     painter.end();
-}
-
-void Brush::mouseReleased(QMouseEvent *, PaintWorkspace *wsp)
-{
     wsp->applyChange();
-    polygon.clear();
 }
 
-void Brush::paintChange(QPainter &painter, QImage *layer, QImage *change)
+void Line::paintChange(QPainter &painter, QImage *layer, QImage *)
 {
     painter.drawImage(0, 0, *layer);
-    painter.drawImage(0, 0, *change);
+    QPen pen(col);
+    pen.setWidth(size->value());
+    pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
+                                          endStyle->currentIndex()).toInt()));
+    painter.setPen(pen);
+    painter.drawLine(start, end);
 }
 
-void Brush::initSettingsDockWidget()
+void Line::initSettingsDockWidget()
 {
     settings = new QDockWidget;
     QWidget *w = new QWidget;
@@ -86,7 +75,7 @@ void Brush::initSettingsDockWidget()
     settings->setWidget(w);
 }
 
-void Brush::init()
+void Line::init()
 {
     icon = new QIcon(":icons/brush.png");
     QPixmap pix(":cursors/brush.png");

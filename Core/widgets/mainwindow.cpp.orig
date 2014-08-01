@@ -35,9 +35,9 @@ QColor MainWindow::getSecondColor()
     return pal->getSecondColor();
 }
 
-PaintWorkspace *MainWindow::newFile(int width, int height, bool transparent)
+PaintWorkspace* MainWindow::newFile(int width, int height)
 {
-    WorkspaceShell *s = new WorkspaceShell(0, width, height, transparent);
+    WorkspaceShell *s = new WorkspaceShell(0, width, height);
     area->addSubWindow(s);
     s->show();
     return s->getWorkspace();
@@ -55,8 +55,13 @@ void MainWindow::newFile()
     {
         int w = width->value();
         int h = height->value();
-        newFile(w, h, transparentBackground->isChecked());
+        PaintWorkspace *wsp = newFile(w, h);
 
+        if (transparentBackground->isChecked())
+        {
+            wsp->removeLayer(0);
+            wsp->addNewLayer();
+        }
     }
 
     delete dialog;
@@ -215,20 +220,6 @@ void MainWindow::updateUndoButtons()
     }
 }
 
-void MainWindow::enableUndoButtons()
-{
-    if(getCurrentWorkspace())
-    {
-        aUndo->setEnabled(true);
-        aRedo->setEnabled(true);
-    }
-    else
-    {
-        aUndo->setEnabled(false);
-        aRedo->setEnabled(false);
-    }
-}
-
 void MainWindow::loadPlugins()
 {
     QDir pluginsDir(qApp->applicationDirPath());
@@ -373,7 +364,6 @@ void MainWindow::createMenuBar()
     connect(aRedo, SIGNAL(triggered()), SLOT(redo()));
 
     connect(mEdit, SIGNAL(aboutToShow()), SLOT(updateUndoButtons()));
-    connect(mEdit, SIGNAL(aboutToHide()), SLOT(enableUndoButtons()));
 
     mEdit->addAction(aUndo);
     mEdit->addAction(aRedo);
@@ -484,7 +474,7 @@ void MainWindow::updateIndicators()
 
 void MainWindow::open(const QString &filename)
 {
-    WorkspaceShell *s = new WorkspaceShell(0, 0, 0, false, filename);
+    WorkspaceShell *s = new WorkspaceShell(0, 0, 0, filename);
     area->addSubWindow(s);
     s->show();
 }

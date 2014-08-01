@@ -14,12 +14,12 @@ class QComboBox;
 class Brush : Instrument
 {
 public:
-    void mousePressed(QMouseEvent *evt, PaintWorkspace *wsp);
-    void mouseMoved(QMouseEvent *evt, PaintWorkspace *wsp);
-    void mouseReleased(QMouseEvent *evt, PaintWorkspace *wsp);
-    void paintChange(QPainter &painter, QImage *layer, QImage *change);
+    void mousePressed(QMouseEvent* evt, PaintWorkspace* wsp);
+    void mouseMoved(QMouseEvent* evt, PaintWorkspace* wsp);
+    void mouseReleased(QMouseEvent* evt, PaintWorkspace* wsp);
+    void paintChange(QPainter& painter, QImage* layer, QImage* change);
     void initSettingsDockWidget();
-    static Instrument *instance;
+    static Instrument* instance;
     const QString getName()
     {
         return QObject::tr("Brush");
@@ -28,8 +28,8 @@ public:
 protected:
     QVector<QPoint> polygon;
     QColor col;
-    QSpinBox *size;
-    QComboBox *endStyle;
+    QSpinBox* size;
+    QComboBox* endStyle;
 };
 
 #endif // BRUSH_H

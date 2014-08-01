@@ -20,7 +20,7 @@ class PaintWorkspace : public QWidget
     Q_OBJECT
 public:
     explicit PaintWorkspace(WorkspaceShell *shell, QWidget *parent = 0,
-                            const int width = 800, const int height = 600, bool transparent = false);
+                            const int width = 800, const int height = 600);
     explicit PaintWorkspace(WorkspaceShell *shell, const QString &filename);
     ~PaintWorkspace();
     enum NewLayerType {Transparent, White, CurrentColor};
@@ -65,12 +65,11 @@ signals:
     void nameChanged(const QString &);
 
 public slots:
-    void addNewLayer(int layerIdx,
-                     NewLayerType type = Transparent,
+    void addNewLayer(const int layerIdx,
+                     const NewLayerType type = Transparent,
                      const QColor &color = QColor(Qt::white), bool saveToUndoStack = true);
-    void removeLayer(int layerIdx, bool saveToUndoStack = true);
-    void renameLayer(int layerIdx, const QString &newName,
-                     bool saveToUndoStack = true);
+    void removeLayer(const int layerIdx, bool saveToUndoStack = true);
+    void renameLayer(const int layerIdx, const QString &newName, bool saveToUndoStack = true);
     void zoomIn();
     void zoomOut();
     void restoreZoom();

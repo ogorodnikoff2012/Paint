@@ -13,12 +13,13 @@ const double PaintWorkspace::minScale = 0.03125; // 2^(-5)
 const double PaintWorkspace::maxScale = 32; // 2^(5)
 
 PaintWorkspace::PaintWorkspace(WorkspaceShell *shell, QWidget *parent,
-                               int width, int height, bool transparent) :
+                               int width, int height) :
     QWidget(parent)
 {
     this->shell = shell;
     initWorkspace(width, height);
-    addNewLayer(0, transparent ? Transparent : White, QColor(Qt::white), false);
+    addNewLayer(White);
+    autoSave();
 }
 
 PaintWorkspace::PaintWorkspace(WorkspaceShell *shell, const QString &filename)
@@ -37,9 +38,9 @@ PaintWorkspace::~PaintWorkspace()
         delete img;
     }
     delete change;
-    foreach (Action * action, undoStack)
+    foreach (QTemporaryFile * file, undoStack)
     {
-        delete action;
+        delete file;
     }
 }
 
@@ -85,7 +86,7 @@ void PaintWorkspace::setName(const QString &name)
     emit nameChanged(QFileInfo(name).fileName());
 }
 
-void PaintWorkspace::addNewLayer(int layerIdx, const NewLayerType type,
+void PaintWorkspace::addNewLayer(const int layerIdx, const NewLayerType type,
                                  const QColor &color, bool saveToUndoStack)
 {
     QImage *img = new QImage(layerWidth, layerHeight,
@@ -106,24 +107,13 @@ void PaintWorkspace::addNewLayer(int layerIdx, const NewLayerType type,
             break;
     }
 
-    if(layerIdx >= 0 && layerIdx < layers.size())
-    {
-        layers.insert(layerIdx, img);
-        layerNames.insert(layerIdx, tr("Layer #") + QString().setNum(++layerCounter));
-    }
-    else
-    {
-        layers << img;
-        layerNames << tr("Layer #") + QString().setNum(++layerCounter);
-        layerIdx = layers.size() - 1;
-    }
+    layers.insert(layerIdx, img);
+    layerNames.insert(layerIdx, tr("Layer #") + QString().setNum(++layerCounter));
 
     if (saveToUndoStack)
         updateUndoStack(new Action(QVariant(QString().setNum(
                                                 layerIdx).append("~").append(layerNames[layerIdx])), Action::LAYER_CREATED));
 
-    curLayer = layerIdx;
-    autoSave();
     update();
 }
 
@@ -137,8 +127,6 @@ void PaintWorkspace::removeLayer(const int layerIdx, bool saveToUndoStack)
 
         layerNames.removeAt(layerIdx);
         layers.remove(layerIdx);
-        if(curLayer == layers.size())
-            curLayer--;
     }
 
     update();
@@ -407,11 +395,10 @@ void PaintWorkspace::importQtp(const QString &filename)
 void PaintWorkspace::autoSave()
 {
     AutoSaver *saver = new AutoSaver(curLayer, new QImage(*layers[curLayer]));
-    saver->file = new QTemporaryFile;
+    //qDebug() << QThread::currentThread();
     connect(saver, SIGNAL(finished()), saver, SLOT(deleteLater()));
-    //connect(saver, SIGNAL(savingFinished(QTemporaryFile *)),
-    //        SLOT(updateUndoStack(QTemporaryFile *)));
-    updateUndoStack(saver->file);
+    connect(saver, SIGNAL(savingFinished(QTemporaryFile *)),
+            SLOT(updateUndoStack(QTemporaryFile *)));
     saver->start();
 }
 
@@ -585,10 +572,9 @@ void PaintWorkspace::redo()
         int secondTilda = str.indexOf('~', firstTilda);
         int layerIdx = str.left(firstTilda).toInt();
         int oldNameLength = str.mid(firstTilda, secondTilda - firstTilda).toInt();
-        QString newName = str.mid(secondTilda + oldNameLength);
+        QString newName = str.mid(secondTilda+oldNameLength);
         renameLayer(layerIdx, newName, false);
     }
-
     update();
     shell->updateRulers();
 }
@@ -643,11 +629,10 @@ void PaintWorkspace::changeScale(int direction)
 
 void PaintWorkspace::resetUndoStack()
 {
-    while(!undoStack.empty())
+    while (undoAvailable())
     {
-        delete undoStack.back();
-        undoStack.pop_back();
+        undo();
     }
-    undoPointer = -1;
-    autoSave();
+
+    // TODO FINISH
 }

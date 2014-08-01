@@ -22,7 +22,9 @@ SOURCES += main.cpp \
 	widgets/horizontalruler.cpp \
     widgets/palette.cpp \
     misc/autosaver.cpp \
-    instruments/brush.cpp
+    instruments/brush.cpp \
+    instruments/line.cpp \
+    misc/action.cpp
 
 HEADERS  += \
 	headers/paintworkspace.h \
@@ -37,7 +39,9 @@ HEADERS  += \
 	headers/horizontalruler.h \
     headers/palette.h \
     headers/autosaver.h \
-    headers/brush.h
+    headers/brush.h \
+    headers/line.h \
+	headers/action.h
 
 win32 {
 	CONFIG(debug, release|debug):DESTDIR = ../debug/

@@ -7,7 +7,7 @@ class Plugin
 {
 public:
     virtual ~Plugin() { }
-    virtual void initPlugin(MainWindow *window) = 0;
+    virtual void initPlugin(MainWindow* window) = 0;
 };
 
 QT_BEGIN_NAMESPACE

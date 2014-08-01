@@ -20,12 +20,12 @@ signals:
 public slots:
 
 protected:
-    virtual void paintEvent(QPaintEvent *);
-    virtual void mouseMoveEvent(QMouseEvent *);
-    virtual void leaveEvent(QEvent *);
-    virtual void resizeEvent(QResizeEvent *);
+    virtual void paintEvent(QPaintEvent*);
+    virtual void mouseMoveEvent(QMouseEvent*);
+    virtual void leaveEvent(QEvent*);
+    virtual void resizeEvent(QResizeEvent*);
     QPoint pt;
-    QPixmap *pixmap;
+    QPixmap* pixmap;
 };
 
 #endif // TESTWIDGET_H

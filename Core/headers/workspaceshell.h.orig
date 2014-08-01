@@ -14,9 +14,8 @@ class WorkspaceShell : public QWidget
 {
     Q_OBJECT
 public:
-    explicit WorkspaceShell(QWidget *parent = 0, const int width = 800,
-                            const int height = 600, bool transparent = false, const QString &str = "");
-    PaintWorkspace *getWorkspace()
+    explicit WorkspaceShell(QWidget *parent = 0, const int width = 800, const int height = 600, const QString &str = "");
+    PaintWorkspace* getWorkspace()
     {
         return wsp;
     }
@@ -33,10 +32,10 @@ public slots:
 protected:
     void closeEvent(QCloseEvent *evt);
     //void wheelEvent(QWheelEvent *evt);
-    VerticalRuler *vRuler;
-    HorizontalRuler *hRuler;
-    PaintWorkspace *wsp;
-    void initWorkspace(const int width, const int height, bool transparent, const QString &str);
+    VerticalRuler* vRuler;
+    HorizontalRuler* hRuler;
+    PaintWorkspace* wsp;
+    void initWorkspace(const int width, const int height, const QString& str);
     static int untitledCounter;
     static int nextUntitled()
     {

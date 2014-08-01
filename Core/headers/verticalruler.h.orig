@@ -11,15 +11,15 @@ class VerticalRuler : public QWidget
 {
     Q_OBJECT
 public:
-    explicit VerticalRuler(WorkspaceShell *shell, QWidget *parent = 0);
+    explicit VerticalRuler(WorkspaceShell* shell, QWidget *parent = 0);
 
 signals:
 
 public slots:
 
 protected:
-    void paintEvent(QPaintEvent *evt);
-    WorkspaceShell *shell;
+    void paintEvent(QPaintEvent* evt);
+    WorkspaceShell* shell;
 };
 
 #endif // VERTICALRULER_H

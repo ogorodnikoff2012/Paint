@@ -43,7 +43,7 @@ public:
     void updateIndicators();
     QBrush background;
     void open(const QString &filename);
-    PaintWorkspace *newFile(int width, int height, bool transparent = false);
+    PaintWorkspace* newFile(int width, int height);
 
 signals:
 
@@ -75,7 +75,6 @@ protected:
 
 protected slots:
     void updateUndoButtons();
-    void enableUndoButtons();
 
 private:
     void loadPlugins();

@@ -1,0 +1,23 @@
+#include "headers/action.h"
+
+#include <QtCore>
+
+Action::Action(const QVariant &data, ActionType type) :
+    data(data),
+    type(type)
+{
+
+}
+
+Action::~Action()
+{
+    if (type == LAYER_CHANGED)
+    {
+        QTemporaryFile *f = (QTemporaryFile *)data.toUInt();
+
+        if (f)
+        {
+            delete f;
+        }
+    }
+}
