@@ -33,6 +33,7 @@ void Line::mouseReleased(QMouseEvent *, PaintWorkspace *wsp)
 {
     QImage *img = wsp->getChange();
     QPainter painter(img);
+    painter.translate(0.5, 0.5);
     QPen pen(col);
     pen.setWidth(size->value());
     pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
@@ -46,12 +47,14 @@ void Line::mouseReleased(QMouseEvent *, PaintWorkspace *wsp)
 void Line::paintChange(QPainter &painter, QImage *layer, QImage *)
 {
     painter.drawImage(0, 0, *layer);
+    painter.translate(0.5, 0.5);
     QPen pen(col);
     pen.setWidth(size->value());
     pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
                                           endStyle->currentIndex()).toInt()));
     painter.setPen(pen);
     painter.drawLine(start, end);
+    painter.translate(-0.5, -0.5);
 }
 
 void Line::initSettingsDockWidget()
@@ -68,6 +71,7 @@ void Line::initSettingsDockWidget()
     endStyle->addItem(QObject::tr("Flat"), QVariant(Qt::FlatCap));
     endStyle->addItem(QObject::tr("Round"), QVariant(Qt::RoundCap));
     endStyle->addItem(QObject::tr("Square"), QVariant(Qt::SquareCap));
+    endStyle->setCurrentIndex(1);
 
     l->addWidget(size);
     l->addWidget(endStyle);
