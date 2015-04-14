@@ -13,7 +13,7 @@ Action::~Action()
 {
     if (type == LAYER_CHANGED)
     {
-        QTemporaryFile *f = (QTemporaryFile *)data.toUInt();
+        QTemporaryFile *f = (QTemporaryFile *)data.toULongLong();
 
         if (f)
         {

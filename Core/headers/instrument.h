@@ -20,6 +20,7 @@ public:
     virtual const QString getName() = 0;
     virtual void init() = 0;
     static Instrument *instance;
+    int index;
     QIcon *icon;
     QCursor *cursor;
     QDockWidget *settings;

@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QAction>
 #include <QString>
+#include <QVector>
 #include "instrument.h"
 #include "palette.h"
 
@@ -24,11 +25,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     static QVariant toQVariant(const Instrument *instr)
     {
-        return QVariant((uint) instr);
+        return QVariant(instr->index);
     }
     static Instrument *toInstrument(const QVariant &var)
     {
-        Instrument *i = (Instrument *)var.toUInt();
+        Instrument *i = window->instruments[var.toInt()];
         return i;
     }
     static MainWindow *window;
@@ -44,6 +45,7 @@ public:
     QBrush background;
     void open(const QString &filename);
     PaintWorkspace *newFile(int width, int height, bool transparent = false);
+    void loadInstrument(Instrument *);
 
 signals:
 
@@ -96,6 +98,7 @@ private:
     QAction *aUndo;
     QAction *aRedo;
     QLabel *mouseCoords, *statusInformation;
+    QVector<Instrument *> instruments;
 };
 
 #endif // MAINWINDOW_H

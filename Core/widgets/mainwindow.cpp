@@ -43,6 +43,14 @@ PaintWorkspace *MainWindow::newFile(int width, int height, bool transparent)
     return s->getWorkspace();
 }
 
+void MainWindow::loadInstrument(Instrument *i)
+{
+    i->init();
+    i->index = instruments.size();
+    instruments.push_back(i);
+    instrumentBar->addAction(createAction(i));
+}
+
 void MainWindow::newFile()
 {
     QSpinBox *width = new QSpinBox;
@@ -287,12 +295,9 @@ void MainWindow::createInstrumentsToolBar()
 {
     QToolBar *tBar = new QToolBar(tr("Instruments"));
     instrumentBar = tBar;
-    Pencil::instance->init();
-    Brush::instance->init();
-    Line::instance->init();
-    tBar->addAction(createAction(Pencil::instance));
-    tBar->addAction(createAction(Brush::instance));
-    tBar->addAction(createAction(Line::instance));
+    loadInstrument(Pencil::instance);
+    loadInstrument(Brush::instance);
+    loadInstrument(Line::instance);
     setCurrentInstrument(Pencil::instance);
     addToolBar(Qt::LeftToolBarArea, tBar);
 }

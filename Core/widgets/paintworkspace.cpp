@@ -480,7 +480,7 @@ void PaintWorkspace::undo()
 
     if (a->type == Action::LAYER_CHANGED)
     {
-        QTemporaryFile *f = (QTemporaryFile *)(a->data.toUInt());
+        QTemporaryFile *f = (QTemporaryFile *)(a->data.toULongLong());
 
         if (f->open())
         {
@@ -543,7 +543,7 @@ void PaintWorkspace::redo()
 
     if (a->type == Action::LAYER_CHANGED)
     {
-        QTemporaryFile *f = (QTemporaryFile *)(a->data.toUInt());
+        QTemporaryFile *f = (QTemporaryFile *)(a->data.toULongLong());
 
         if (f->open())
         {
@@ -612,7 +612,7 @@ void PaintWorkspace::mergeLayerAndChange()
 
 void PaintWorkspace::updateUndoStack(QTemporaryFile *f)
 {
-    updateUndoStack(new Action(QVariant((uint)f), Action::LAYER_CHANGED));
+    updateUndoStack(new Action(QVariant((qulonglong)f), Action::LAYER_CHANGED));
 }
 
 void PaintWorkspace::updateUndoStack(Action *a)
