@@ -107,7 +107,7 @@ QDialog *MainWindow::createNewFileDialog(QSpinBox *width, QSpinBox *height,
 void MainWindow::open()
 {
     QStringList list = QFileDialog::getOpenFileNames(0, tr("Open files"),
-                       QDir::homePath(), PaintWorkspace::getFilter());
+                       QDir::homePath(), PaintWorkspace::getFilenameFilter());
     foreach(QString str, list)
     {
         open(str);

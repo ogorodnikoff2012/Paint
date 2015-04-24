@@ -36,7 +36,7 @@ public:
     }
     void setName(const QString &name);
     bool save(bool forced = false);
-    static QString getFilter();
+    static QString getFilenameFilter();
     double getScale()
     {
         return scale;

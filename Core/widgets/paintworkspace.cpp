@@ -166,11 +166,11 @@ bool PaintWorkspace::save(bool forced)
     if (!hasFile)
     {
         str = QFileDialog::getSaveFileName(0, tr("Save File"),
-                                           QDir::homePath() + QDir::separator() + name + ".png", getFilter());
+                                           QDir::homePath() + QDir::separator() + name + ".png", getFilenameFilter());
     }
     else if (forced)
     {
-        str = QFileDialog::getSaveFileName(0, tr("Save File"), name, getFilter());
+        str = QFileDialog::getSaveFileName(0, tr("Save File"), name, getFilenameFilter());
     }
     else
     {
@@ -415,7 +415,7 @@ void PaintWorkspace::autoSave()
     saver->start();
 }
 
-QString PaintWorkspace::getFilter()
+QString PaintWorkspace::getFilenameFilter()
 {
     QStringList list;
     QList<QByteArray> formatList = QImageWriter::supportedImageFormats();
@@ -428,9 +428,16 @@ QString PaintWorkspace::getFilter()
     list << "qtp";
 
     QString filter;
+
     filter.append("Images (*.");
     filter.append(list.join(" *."));
     filter.append(")");
+
+    foreach(QByteArray format, formatList)
+    {
+        QString str(format);
+        filter.append(";;" + str.toUpper() + " image (*." + str + ")");
+    }
 
     return filter;
 }
