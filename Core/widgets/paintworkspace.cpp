@@ -59,13 +59,13 @@ void PaintWorkspace::initWorkspace(int width, int height)
     setMouseTracking(true);
 }
 
-QImage *PaintWorkspace::newChange()
+QImage *PaintWorkspace::newChange(bool get_layer)
 {
     delete change;
     change = new QImage(layerWidth, layerHeight,
                         QImage::Format_ARGB32_Premultiplied);
     change->fill(Qt::transparent);
-    return change;
+    return get_layer ? layers[curLayer] : change;
 }
 
 void PaintWorkspace::applyChange()

@@ -16,5 +16,6 @@
         <file>cursors/brush.png</file>
         <file>icons/line.png</file>
         <file>cursors/line.png</file>
+        <file>icons/flood_fill.png</file>
     </qresource>
 </RCC>

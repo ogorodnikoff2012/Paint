@@ -1,6 +1,8 @@
 #ifndef INSTRUMENT_H
 #define INSTRUMENT_H
 
+#include <QString>
+
 class QMouseEvent;
 class QIcon;
 class QCursor;

@@ -3,6 +3,7 @@
 #include "headers/brush.h"
 #include "headers/pencil.h"
 #include "headers/line.h"
+#include "headers/floodfill.h"
 #include "headers/workspaceshell.h"
 #include "headers/paintworkspace.h"
 
@@ -298,6 +299,7 @@ void MainWindow::createInstrumentsToolBar()
     loadInstrument(Pencil::instance);
     loadInstrument(Brush::instance);
     loadInstrument(Line::instance);
+    loadInstrument(FloodFill::instance);
     setCurrentInstrument(Pencil::instance);
     addToolBar(Qt::LeftToolBarArea, tBar);
 }

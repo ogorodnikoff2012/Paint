@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     misc/autosaver.cpp \
     instruments/brush.cpp \
     instruments/line.cpp \
-    misc/action.cpp
+    misc/action.cpp \
+    instruments/floodfill.cpp
 
 HEADERS  += \
 	headers/paintworkspace.h \
@@ -41,7 +42,8 @@ HEADERS  += \
     headers/autosaver.h \
     headers/brush.h \
     headers/line.h \
-	headers/action.h
+	headers/action.h \
+    headers/floodfill.h
 
 win32 {
 	CONFIG(debug, release|debug):DESTDIR = ../debug/

@@ -24,7 +24,7 @@ public:
     explicit PaintWorkspace(WorkspaceShell *shell, const QString &filename);
     ~PaintWorkspace();
     enum NewLayerType {Transparent, White, CurrentColor};
-    QImage *newChange();
+    QImage *newChange(bool get_layer = false);
     QImage *getChange()
     {
         return change;
