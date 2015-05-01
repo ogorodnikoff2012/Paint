@@ -62,9 +62,13 @@ void PaintWorkspace::initWorkspace(int width, int height)
 QImage *PaintWorkspace::newChange(bool get_layer)
 {
     delete change;
-    change = new QImage(layerWidth, layerHeight,
+    change = 0;
+    if(!get_layer)
+    {
+        change = new QImage(layerWidth, layerHeight,
                         QImage::Format_ARGB32_Premultiplied);
-    change->fill(Qt::transparent);
+        change->fill(Qt::transparent);
+    }
     return get_layer ? layers[curLayer] : change;
 }
 

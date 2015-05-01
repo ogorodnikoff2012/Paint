@@ -27,7 +27,7 @@ public:
     QImage *newChange(bool get_layer = false);
     QImage *getChange()
     {
-        return change;
+        return change == 0 ? layers[curLayer] : change;
     }
     void applyChange();
     bool isChanged()

@@ -31,8 +31,7 @@ void Brush::mousePressed(QMouseEvent *evt, PaintWorkspace *wsp)
                                           endStyle->currentIndex()).toInt()));
     painter.setPen(pen);
     painter.drawPoint(pos);
-    polygon.clear();
-    polygon.append(pos);
+    last = pos;
     painter.end();
 }
 
@@ -40,22 +39,20 @@ void Brush::mouseMoved(QMouseEvent *, PaintWorkspace *wsp)
 {
     QPoint pos = wsp->getCoords();
     QImage *img = wsp->getChange();
-    img->fill(Qt::transparent);
     QPainter painter(img);
-    polygon.append(pos);
     QPen pen(col);
     pen.setWidth(size->value());
     pen.setCapStyle((Qt::PenCapStyle)(endStyle->itemData(
                                           endStyle->currentIndex()).toInt()));
     painter.setPen(pen);
-    painter.drawPolyline(QPolygon(polygon));
+    painter.drawLine(last, pos);
+    last = pos;
     painter.end();
 }
 
 void Brush::mouseReleased(QMouseEvent *, PaintWorkspace *wsp)
 {
     wsp->applyChange();
-    polygon.clear();
 }
 
 void Brush::paintChange(QPainter &painter, QImage *layer, QImage *change)

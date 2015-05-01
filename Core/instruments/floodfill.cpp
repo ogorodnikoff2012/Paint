@@ -1,4 +1,4 @@
-#include "headers\floodfill.h"
+#include "headers/floodfill.h"
 #include "headers/paintworkspace.h"
 #include "headers/mainwindow.h"
 

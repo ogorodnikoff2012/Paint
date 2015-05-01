@@ -26,7 +26,8 @@ public:
     }
     void init();
 protected:
-    QVector<QPoint> polygon;
+//    QVector<QPoint> polygon;
+    QPoint last;
     QColor col;
     QSpinBox *size;
     QComboBox *endStyle;
