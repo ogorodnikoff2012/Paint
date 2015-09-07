@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     createGUI();
     resize(800, 600);
     setWindowTitle(tr("Paint"));
+    setWindowIcon(QIcon(":paint.png"));
     loadPlugins();
 }
 

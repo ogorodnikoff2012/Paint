@@ -63,12 +63,9 @@ QImage *PaintWorkspace::newChange(bool get_layer)
 {
     delete change;
     change = 0;
-    if(!get_layer)
-    {
-        change = new QImage(layerWidth, layerHeight,
+    change = new QImage(layerWidth, layerHeight,
                         QImage::Format_ARGB32_Premultiplied);
-        change->fill(Qt::transparent);
-    }
+    change->fill(Qt::transparent);
     return get_layer ? layers[curLayer] : change;
 }
 
@@ -179,6 +176,20 @@ bool PaintWorkspace::save(bool forced)
     else
     {
         str = name;
+    }
+
+    // Fool protection
+    bool isExtensionSelected = false;
+
+    foreach (QByteArray extension, QImageWriter::supportedImageFormats())
+    {
+        QString ext(extension);
+        isExtensionSelected |= str.endsWith("." + ext, Qt::CaseInsensitive);
+    }
+
+    if (!isExtensionSelected)
+    {
+        str += ".png";
     }
 
     if (!str.isEmpty())

@@ -35,7 +35,7 @@ void AutoSaver::run()
     file->close();
     //img->save("preview.png");
 
-    //qDebug() << file->fileName();
+    qDebug() << file->fileName();
 
     emit savingFinished(file);
     delete img;
